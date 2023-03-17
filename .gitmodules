@@ -1,0 +1,3 @@
+[submodule "math"]
+	path = math
+	url = https://github.com/taehwan642/math.git
