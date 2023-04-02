@@ -1,7 +1,9 @@
 /* Defined before OpenGL and GLUT includes to avoid deprecation messages */
-#include <glfw/glfw3.h>
+#define GL_SILENCE_DEPRECATION
+#define GLFW_INCLUDE_GLCOREARB
+#include <GLFW/glfw3.h>
 // #else
-#include <GL/gl.h>
+//#include <GL/gl.h>
 // #include <GL/glut.h>
 
 #include "logs.h"
@@ -102,8 +104,8 @@ inline auto readFile(const std::string_view path) -> const std::string
 
 const bool loadShaderProgram(const bool erase_if_program_registered = true)
 {
-    const std::string basicVertexShaderSource = readFile("shaders/vertex_shader.glsl");
-    const std::string basicFragmentShaderSource = readFile("shaders/fragment_shader.glsl");
+    const std::string basicVertexShaderSource = readFile("vertex_shader.glsl");
+    const std::string basicFragmentShaderSource = readFile("fragment_shader.glsl");
 
     if (!shader_utils.registerShader(ShaderUtils::Type::VERTEX_SHADER_TYPE, basicVertexShaderSource.c_str()))
     {
