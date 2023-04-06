@@ -1,10 +1,13 @@
-/* Defined before OpenGL and GLUT includes to avoid deprecation messages */
+#ifdef __APPLE__
 #define GL_SILENCE_DEPRECATION
 #define GLFW_INCLUDE_GLCOREARB
 #include <GLFW/glfw3.h>
-// #else
-//#include <GL/gl.h>
-// #include <GL/glut.h>
+#endif
+#ifdef _WIN64
+#include "include/glad/gl.h"
+#include <GLFW/glfw3.h>
+#endif
+
 
 #include "logs.h"
 #include "shader_utils.h"
