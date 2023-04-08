@@ -4,7 +4,8 @@
 #include <GLFW/glfw3.h>
 #endif
 #ifdef _WIN64
-#include "include/glad/gl.h"
+#include <glad/glad.h>
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #endif
 
@@ -69,13 +70,22 @@ GLFWwindow *initializeWindow()
         error("window creation failed");
         return NULL;
     }
+
     // Close the window as soon as the Escape key has been pressed
     glfwSetKeyCallback(window, quitCallback);
     // Easy reload
     glfwSetKeyCallback(window, reloadShaders);
     // Makes the window context current
     glfwMakeContextCurrent(window);
+#ifdef _WIN64
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        error("could not start GLAD");
+        return NULL;
+    }
+#endif
     // Enable the viewport
+    // cannot use gl function before initilize (defined region code)
     glViewport(0, 0, HEIGHT, WIDTH);
 
     return window;
