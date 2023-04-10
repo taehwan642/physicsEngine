@@ -8,11 +8,6 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #endif
-#ifdef _linux_
-#include <glad/glad.h>
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-#endif
 
 #include "logs.h"
 #include "shader_utils.h"
