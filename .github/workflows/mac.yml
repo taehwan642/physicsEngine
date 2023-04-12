@@ -41,5 +41,5 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v3
       with:
-        name: build-windows
+        name: build-mac
         path: ${{github.workspace}}/build
