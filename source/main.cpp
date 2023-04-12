@@ -116,8 +116,8 @@ inline auto readFile(const std::string_view path) -> const std::string
 
 const bool loadShaderProgram(const bool erase_if_program_registered = true)
 {
-    const std::string basicVertexShaderSource = readFile("vertex_shader.glsl");
-    const std::string basicFragmentShaderSource = readFile("fragment_shader.glsl");
+    const std::string basicVertexShaderSource = readFile("Shader/vertex_shader.glsl");
+    const std::string basicFragmentShaderSource = readFile("Shader/fragment_shader.glsl");
 
     if (!shader_utils.registerShader(ShaderUtils::Type::VERTEX_SHADER_TYPE, basicVertexShaderSource.c_str()))
     {
