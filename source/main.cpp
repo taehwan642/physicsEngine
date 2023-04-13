@@ -15,6 +15,9 @@
 #include <iostream>
 #include <fstream>
 
+#include "Vector3.h"
+#include "Vector2.h"
+
 const size_t WIDTH = 640;
 const size_t HEIGHT = 480;
 const char *WINDOW_NAME = "OpenGL Explorer";
@@ -147,6 +150,11 @@ int main(void)
         error("could not start GLFW3");
         return -1;
     }
+
+    Math::Vector2 v2 = Math::Vector2(1, 1);
+    Math::Vector3 v3 = Math::Vector3(1, 1, 1);
+    std::cout << v2.LengthSquared() << " " << v2.Length() << std::endl;
+    std::cout << v3.LengthSquared() << " " << v3.Length() << std::endl;
 
     GLFWwindow *window = initializeWindow();
     if (!window)
