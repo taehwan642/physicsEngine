@@ -42,4 +42,6 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: build-mac
-        path: ${{github.workspace}}/build
+        path: |
+          ${{github.workspace}}/build/source/source.exec
+          ${{github.workspace}}/build/source/Shader

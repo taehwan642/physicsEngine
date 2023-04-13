@@ -42,4 +42,6 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: build-windows
-        path: ${{github.workspace}}/build
+        path: |
+          ${{github.workspace}}/build/source/Release/source.exe
+          ${{github.workspace}}/build/source/Shader
