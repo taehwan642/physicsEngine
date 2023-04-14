@@ -23,15 +23,6 @@ const size_t HEIGHT = 480;
 const char *WINDOW_NAME = "OpenGL Explorer";
 auto shader_utils = ShaderUtils::Program{};
 
-/*
- * Callback to handle the "close window" event, once the user pressed the Escape key.
- */
-static void quitCallback(GLFWwindow *window, int key, int scancode, int action, int _mods)
-{
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-}
-
 /**
  * @brief Load the shaders, in order to display the result
  *
@@ -44,13 +35,16 @@ const bool loadShaderProgram(const bool erase_if_program_registered);
 /*
  * Callback to handle the "reload" event, once the user pressed the 'r' key.
  */
-static void reloadShaders(GLFWwindow *window, int key, int scancode, int action, int _mods)
+static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int _mods)
 {
     if (key == GLFW_KEY_R && action == GLFW_PRESS)
     {
         debug("reloading...");
         loadShaderProgram(true);
     }
+
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
 /*
@@ -74,9 +68,8 @@ GLFWwindow *initializeWindow()
     }
 
     // Close the window as soon as the Escape key has been pressed
-    glfwSetKeyCallback(window, quitCallback);
     // Easy reload
-    glfwSetKeyCallback(window, reloadShaders);
+    glfwSetKeyCallback(window, KeyCallback);
     // Makes the window context current
     glfwMakeContextCurrent(window);
 #ifdef _WIN64
