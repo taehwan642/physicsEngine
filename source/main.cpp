@@ -15,8 +15,8 @@
 #include <iostream>
 #include <fstream>
 
-#include "Vector3.h"
-#include "Vector2.h"
+#include "Vector3.hpp"
+#include "Vector2.hpp"
 
 const size_t WIDTH = 640;
 const size_t HEIGHT = 480;
@@ -56,8 +56,9 @@ static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, i
 GLFWwindow *initializeWindow()
 {
     // Minimum target is OpenGL 4.1
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow *window = glfwCreateWindow(HEIGHT, WIDTH, WINDOW_NAME, NULL, NULL);
@@ -81,7 +82,7 @@ GLFWwindow *initializeWindow()
 #endif
     // Enable the viewport
     // cannot use gl function before initilize (defined region code)
-    glViewport(0, 0, HEIGHT, WIDTH);
+    glViewport(0, 0, WIDTH, HEIGHT);
 
     return window;
 }
@@ -135,8 +136,14 @@ const bool loadShaderProgram(const bool erase_if_program_registered = true)
     return true;
 }
 
+void ErrorCallback(int, const char* err_str)
+{
+    std::cout << "GLFW Error: " << err_str << std::endl;
+}
+
 int main(void)
 {
+    glfwSetErrorCallback(ErrorCallback);
     // Initialize the lib
     if (!glfwInit())
     {
