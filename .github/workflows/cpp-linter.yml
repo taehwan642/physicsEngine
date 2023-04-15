@@ -18,8 +18,6 @@ jobs:
           extra-args: "-xc++ -std=c++17 -I${{github.workspace}}/header"
           ignore: |
             ${{github.workspace}}/glfw
-            ${{github.workspace}}/glad
-            ${{github.workspace}}/math
 
       - name: Fail
         if: steps.linter.outputs.checks-failed != 0
