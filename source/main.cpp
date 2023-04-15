@@ -46,6 +46,10 @@ static void KeyCallback(GLFWwindow *window, int key, int scancode, int action,
     glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
+void FramebufferSizeCallback(GLFWwindow *window, int width, int height) {
+  glViewport(0, 0, width, height);
+}
+
 /*
  * Initializes the window and viewport via GLFW.
  * The viewport takes the all window.
@@ -79,7 +83,11 @@ GLFWwindow *initializeWindow() {
 #endif
   // Enable the viewport
   // cannot use gl function before initilize (defined region code)
-  glViewport(0, 0, WIDTH, HEIGHT);
+  int width, height;
+  glfwGetFramebufferSize(window, &width, &height);
+  glViewport(0, 0, width, height);
+
+  glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 
   return window;
 }
