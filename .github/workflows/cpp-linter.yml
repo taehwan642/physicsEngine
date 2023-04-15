@@ -17,7 +17,7 @@ jobs:
           thread-comments: true
           extra-args: "-xc++ -std=c++17 -I${{github.workspace}}/header"
           ignore: |
-            ${{github.workspace}}/glfw
+            ./glad
 
       - name: Fail
         if: steps.linter.outputs.checks-failed != 0
