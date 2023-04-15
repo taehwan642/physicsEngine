@@ -15,7 +15,7 @@ jobs:
         with:
           style: Google
           thread-comments: true
-          extra-args: "-xc++ -std=c++17 -I${{github.workspace}}/header"
+          extra-args: "-xc++ -std=c++17 -I${{github.workspace}}/math/header"
           ignore: |
             ./glad
 

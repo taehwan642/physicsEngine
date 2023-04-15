@@ -10,24 +10,29 @@
 #include <GLFW/glfw3.h>
 #endif
 
+#include <array>
 #include <iostream>
 #include <optional>
 
 #include "logs.h"
 #include "shader_utils.h"
 
-ShaderUtils::Program::Program() {}
-
-ShaderUtils::Program::~Program() {
-  if (vertexShader.has_value()) glDeleteShader(vertexShader.value());
-  if (vertexShader.has_value()) glDeleteShader(fragmentShader.value());
-  if (registered && program.has_value()) glDeleteProgram(program.value());
+ShaderUtils::Program::~Program() noexcept {
+  if (vertexShader.has_value()) {
+    glDeleteShader(vertexShader.value());
+  }
+  if (vertexShader.has_value()) {
+    glDeleteShader(fragmentShader.value());
+  }
+  if (registered && program.has_value()) {
+    glDeleteProgram(program.value());
+  }
 }
 
-bool ShaderUtils::Program::registerShader(const ShaderUtils::Type shader_type,
-                                          const char *shader_source) {
+auto ShaderUtils::Program::registerShader(const ShaderUtils::Type shader_type,
+                                          const char *shader_source) -> bool {
   int success = {};
-  char errorMessage[1024] = {};
+  std::array<char, 1024> errorMessage = {};
 
   bool isFragmentShader =
       shader_type == ShaderUtils::Type::FRAGMENT_SHADER_TYPE;
@@ -42,12 +47,12 @@ bool ShaderUtils::Program::registerShader(const ShaderUtils::Type shader_type,
   glCompileShader(shader);
 
   glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-  if (!success) {
-    glGetShaderInfoLog(shader, 1024, NULL, errorMessage);
+  if (success == 0) {
+    glGetShaderInfoLog(shader, 1024, NULL, errorMessage.data());
     if (isFragmentShader) {
-      error("Fragment shader compilation error : " << errorMessage);
+      error("Fragment shader compilation error : " << errorMessage.data());
     } else {
-      error("Vertex shader compilation error : " << errorMessage);
+      error("Vertex shader compilation error : " << errorMessage.data());
     }
 
     return false;
@@ -61,7 +66,7 @@ bool ShaderUtils::Program::registerShader(const ShaderUtils::Type shader_type,
   return true;
 }
 
-bool ShaderUtils::Program::registerProgram(bool erase_if_registered) {
+auto ShaderUtils::Program::registerProgram(bool erase_if_registered) -> bool {
   if (registered && (!erase_if_registered || !program.has_value())) {
     error("program is already registered");
     return false;
@@ -75,7 +80,7 @@ bool ShaderUtils::Program::registerProgram(bool erase_if_registered) {
     return false;
   }
   int success = {};
-  char errorMessage[1024] = {};
+  std::array<char, 1024> errorMessage = {};
   const unsigned int vertexShaderValue = vertexShader.value();
   const unsigned int fragmentShaderValue = fragmentShader.value();
 
@@ -87,9 +92,9 @@ bool ShaderUtils::Program::registerProgram(bool erase_if_registered) {
   glLinkProgram(programValue);
 
   glGetProgramiv(programValue, GL_LINK_STATUS, &success);
-  if (!success) {
-    glGetProgramInfoLog(programValue, 1024, NULL, errorMessage);
-    error("Shader linking error: " << errorMessage);
+  if (success == 0) {
+    glGetProgramInfoLog(programValue, 1024, NULL, errorMessage.data());
+    error("Shader linking error: " << errorMessage.data());
     return false;
   }
 
@@ -102,8 +107,10 @@ bool ShaderUtils::Program::registerProgram(bool erase_if_registered) {
   return true;
 }
 
-std::optional<unsigned int> ShaderUtils::Program::getProgram() const {
+auto ShaderUtils::Program::getProgram() const -> std::optional<unsigned int> {
   return program;
 }
 
-bool ShaderUtils::Program::programIsRegistered() const { return registered; }
+auto ShaderUtils::Program::programIsRegistered() const -> bool {
+  return registered;
+}

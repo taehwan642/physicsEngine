@@ -36,12 +36,12 @@ struct Program {
   /**
    * @brief Constructor
    */
-  Program();
+  Program() = default;
 
   /**
    * @brief Destructor
    */
-  ~Program();
+  ~Program() noexcept;
 
   /**
    * @brief Register a shader
@@ -51,7 +51,8 @@ struct Program {
    * @return true The shader has been successfully registered
    * @return false The shader has not been registered - error is logged
    */
-  bool registerShader(const Type shader_type, const char *shader_source);
+  auto registerShader(const Type shader_type, const char *shader_source)
+      -> bool;
 
   /**
    * @brief Register the GPU program (or shader), after compilation
@@ -63,19 +64,19 @@ struct Program {
    * @return false The shader has not been successfully registered - error is
    * logged
    */
-  bool registerProgram(bool erase_if_registered);
+  auto registerProgram(bool erase_if_registered) -> bool;
 
   /**
    * @brief Returns the GPU program ID object, as optional
    *
    * @return std::optional<unsigned int>
    */
-  std::optional<unsigned int> getProgram() const;
+  auto getProgram() const -> std::optional<unsigned int>;
 
   /**
    * @brief Returns if the GPU program object has been registered or not
    */
-  bool programIsRegistered() const;
+  auto programIsRegistered() const -> bool;
 };
 
 }  // namespace ShaderUtils

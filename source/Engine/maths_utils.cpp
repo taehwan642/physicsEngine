@@ -1,23 +1,23 @@
 #include "maths_utils.h"
 
-const float MathsUtils::x(const vertex *v) { return (*v)[0]; }
+auto MathsUtils::x(const vertex *v) -> float { return (*v)[0]; }
 
-const float MathsUtils::y(const vertex *v) { return (*v)[1]; }
+auto MathsUtils::y(const vertex *v) -> float { return (*v)[1]; }
 
-const float MathsUtils::z(const vertex *v) { return (*v)[2]; }
+auto MathsUtils::z(const vertex *v) -> float { return (*v)[2]; }
 
-const float MathsUtils::r(const vertex *v) { return (*v)[3]; }
+auto MathsUtils::r(const vertex *v) -> float { return (*v)[3]; }
 
-const float MathsUtils::g(const vertex *v) { return (*v)[4]; }
+auto MathsUtils::g(const vertex *v) -> float { return (*v)[4]; }
 
-const float MathsUtils::b(const vertex *v) { return (*v)[5]; }
+auto MathsUtils::b(const vertex *v) -> float { return (*v)[5]; }
 
-const unsigned int MathsUtils::getNbVertex(
-    const MathsUtils::vertex vertices[]) {
+auto MathsUtils::getNbVertex(const MathsUtils::vertex vertices[])
+    -> unsigned int {
   return (unsigned int)(sizeof(*vertices) / MathsUtils::VERTEX_ELEMENTS_NB);
 }
 
-const unsigned int MathsUtils::getNbElements(
-    const MathsUtils::vertex vertices[]) {
+auto MathsUtils::getNbElements(const MathsUtils::vertex vertices[])
+    -> unsigned int {
   return MathsUtils::getNbVertex(vertices) * VERTEX_ELEMENTS_NB;
 }

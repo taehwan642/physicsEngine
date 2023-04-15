@@ -18,7 +18,7 @@ typedef float vertex[VERTEX_ELEMENTS_NB];
  * @param v - the vertex array
  * @return The x position
  */
-const float x(const vertex *v);
+auto x(const vertex *v) -> float;
 
 /**
  * @brief Returns the y position accessor in a 3 dimensional vector
@@ -26,7 +26,7 @@ const float x(const vertex *v);
  * @param v - the vertex array
  * @return The y position
  */
-const float y(const vertex *v);
+auto y(const vertex *v) -> float;
 
 /**
  * @brief Returns the z position accessor in a 3 dimensional vector
@@ -34,7 +34,7 @@ const float y(const vertex *v);
  * @param v - the vertex array
  * @return The z position
  */
-const float z(const vertex *v);
+auto z(const vertex *v) -> float;
 
 /**
  * @brief Returns the red (in RGB) color accessor
@@ -42,7 +42,7 @@ const float z(const vertex *v);
  * @param v - the vertex array
  * @return The red (in RGB) color accessor
  */
-const float r(const vertex *v);
+auto r(const vertex *v) -> float;
 
 /**
  * @brief Returns the green (in RGB) color accessor
@@ -50,7 +50,7 @@ const float r(const vertex *v);
  * @param v - the vertex array
  * @return The green (in RGB) color accessor
  */
-const float g(const vertex *v);
+auto g(const vertex *v) -> float;
 
 /**
  * @brief Returns the blue (in RGB) color accessor
@@ -58,7 +58,7 @@ const float g(const vertex *v);
  * @param v - the vertex array
  * @return The blue (in RGB) color accessor
  */
-const float b(const vertex *v);
+auto b(const vertex *v) -> float;
 
 /**
  * @brief Returns the number of individual vertex arrays inside a vertices array
@@ -66,7 +66,7 @@ const float b(const vertex *v);
  * @param vertices - an array of vertex
  * @return The number of the individual vertex arrays
  */
-const unsigned int getNbVertex(const vertex vertices[]);
+auto getNbVertex(const vertex vertices[]) -> unsigned int;
 
 /**
  * @brief Sums and returns the number of individual elements stored in the
@@ -75,7 +75,7 @@ const unsigned int getNbVertex(const vertex vertices[]);
  * @param vertices - an array of vertex
  * @return The sum of all individual elements stored in the vertices array
  */
-const unsigned int getNbElements(const vertex vertices[]);
+auto getNbElements(const vertex vertices[]) -> unsigned int;
 
 }  // namespace MathsUtils
 
