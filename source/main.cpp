@@ -23,18 +23,8 @@ const size_t HEIGHT = 480;
 const char *WINDOW_NAME = "OpenGL Explorer";
 auto shader_utils = ShaderUtils::Program{};
 
-/**
- * @brief Load the shaders, in order to display the result
- *
- * @param erase_if_program_registered Allow to erase the shader if it exists
- * @return true The shader has been successfully registered
- * @return false The shader has not been registered, due to an error
- */
 const bool loadShaderProgram(const bool erase_if_program_registered);
 
-/*
- * Callback to handle the "reload" event, once the user pressed the 'r' key.
- */
 static void KeyCallback(GLFWwindow *window, int key, int scancode, int action,
                         int _mods) {
   if (key == GLFW_KEY_R && action == GLFW_PRESS) {
@@ -50,15 +40,7 @@ void FramebufferSizeCallback(GLFWwindow *window, int width, int height) {
   glViewport(0, 0, width, height);
 }
 
-/*
- * Initializes the window and viewport via GLFW.
- * The viewport takes the all window.
- * If an error happens, the function returns `NULL` but **does not** free /
- * terminate the GLFW library. Then, do not forget to call `glfwTerminate` if
- * this function returns `NULL`.
- */
 GLFWwindow *initializeWindow() {
-  // Minimum target is OpenGL 4.1
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -71,7 +53,6 @@ GLFWwindow *initializeWindow() {
   }
 
   // Close the window as soon as the Escape key has been pressed
-  // Easy reload
   glfwSetKeyCallback(window, KeyCallback);
   // Makes the window context current
   glfwMakeContextCurrent(window);
@@ -92,13 +73,6 @@ GLFWwindow *initializeWindow() {
   return window;
 }
 
-/**
- * @brief Returns the all file, as a string, which the file path has been passed
- * as parameter
- *
- * @param path The path of the file
- * @return The content of the file, as a string (read all file)
- */
 inline auto readFile(const std::string_view path) -> const std::string {
   // Avoid dynamic allocation: read the 4096 first bytes
   constexpr auto read_size = std::size_t(4096);
@@ -177,10 +151,11 @@ int main(void) {
   /* END OF SHADER PART */
 
   /* DRAW THE TRIANGLE */
-  const MathsUtils::vertex vertices[3] = {
-      {0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f},
-      {0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f},
-      {-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f}};
+  const MathsUtils::vertex vertices[4] = {
+      {-1.0f, 1.0f, 0.0f},
+      {-1.0f, -1.0f, 0.0f},
+      {1.0f, -1.0f, 0.0f},
+      {1.0f, 1.0f, 0.0f}};
 
   // Vertex Buffer Object = VBO
   GLuint VBO = {};
@@ -209,22 +184,62 @@ int main(void) {
                         (GLvoid *)0);
   glEnableVertexAttribArray(0);
 
-  // Specify color attribute -> 3 as offset
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-                        MathsUtils::VERTEX_ELEMENTS_NB * sizeof(float),
-                        (GLvoid *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-
   glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  unsigned int indices[6] = {0, 1, 2, 0, 2, 3};
+
+  GLuint elementbuffer;
+  glGenBuffers(1, &elementbuffer);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
   /* END OF DRAWING */
+
+  auto aspect_ratio = WIDTH / HEIGHT;
+
+  float viewport_height = 2.0;
+  float viewport_width = aspect_ratio * viewport_height;
+  float focal_length = 1.0;
+  math::Vector3 origin = math::Vector3(0, 0, 0);
+  math::Vector3 horizontal = math::Vector3(viewport_width, 0, 0);
+  math::Vector3 vertical = math::Vector3(0.0f, viewport_height, 0.0);
+  math::Vector3 lower_left_corner = origin - horizontal / 2.0f - vertical / 2.0f - math::Vector3(0, 0, focal_length);
+
+  math::Vector3 sphereOrigin = math::Vector3(0, 0, -1);
+  float radius = 0.5f;
 
   while (!glfwWindowShouldClose(window)) {
     // Render
-    glClearColor(0.5, 0.5, 0.5, 1.0);
+    glClearColor(1.0, 0.5, 0.5, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(shader_utils.getProgram().value());
+    
+    int uniformLowerLeftLocation = glGetUniformLocation(shader_utils.getProgram().value(), "lower_left_corner");
+    glUniform3f(uniformLowerLeftLocation, lower_left_corner.x_, lower_left_corner.y_, lower_left_corner.z_);
+
+    int uniformHorizonLocation = glGetUniformLocation(shader_utils.getProgram().value(), "horizontal");
+    glUniform3f(uniformHorizonLocation, horizontal.x_, horizontal.y_, horizontal.z_);
+
+    int uniformVerticalLocation = glGetUniformLocation(shader_utils.getProgram().value(), "vertical");
+    glUniform3f(uniformVerticalLocation, vertical.x_, vertical.y_, vertical.z_);
+
+    int uniformOriginLocation = glGetUniformLocation(shader_utils.getProgram().value(), "origin");
+    glUniform3f(uniformOriginLocation, origin.x_, origin.y_, origin.z_);
+
+    int uniformSphereLocation = glGetUniformLocation(shader_utils.getProgram().value(), "sphereOrigin");
+    glUniform3f(uniformSphereLocation, sphereOrigin.x_, sphereOrigin.y_, sphereOrigin.z_);
+
+    int uniformRadiusLocation = glGetUniformLocation(shader_utils.getProgram().value(), "radius");
+    glUniform1f(uniformRadiusLocation, radius);
+
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(
+    GL_TRIANGLES,      // mode
+    6,    // count
+    GL_UNSIGNED_INT,   // type
+    (void*)0           // element array buffer offset
+    );
+    glUseProgram(0);
+
     // Poll for and process events
     glfwPollEvents();
     // Swap front and back buffers

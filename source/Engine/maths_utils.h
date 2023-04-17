@@ -3,7 +3,7 @@
 
 namespace MathsUtils {
 
-const unsigned int VERTEX_ELEMENTS_NB = 6;
+const unsigned int VERTEX_ELEMENTS_NB = 3;
 
 /**
  * @brief Reassemble all elements of a vertex in a dedicated type
@@ -35,30 +35,6 @@ auto y(const vertex *v) -> float;
  * @return The z position
  */
 auto z(const vertex *v) -> float;
-
-/**
- * @brief Returns the red (in RGB) color accessor
- *
- * @param v - the vertex array
- * @return The red (in RGB) color accessor
- */
-auto r(const vertex *v) -> float;
-
-/**
- * @brief Returns the green (in RGB) color accessor
- *
- * @param v - the vertex array
- * @return The green (in RGB) color accessor
- */
-auto g(const vertex *v) -> float;
-
-/**
- * @brief Returns the blue (in RGB) color accessor
- *
- * @param v - the vertex array
- * @return The blue (in RGB) color accessor
- */
-auto b(const vertex *v) -> float;
 
 /**
  * @brief Returns the number of individual vertex arrays inside a vertices array
