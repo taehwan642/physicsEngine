@@ -194,9 +194,11 @@ int main(void) {
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
   /* END OF DRAWING */
 
-  auto aspect_ratio = WIDTH / HEIGHT;
+  auto aspect_ratio = WIDTH / (float)HEIGHT;
 
   float viewport_height = 2.0;
+  // ratio = width / height
+  // width = ratio * height
   float viewport_width = aspect_ratio * viewport_height;
   float focal_length = 1.0;
   math::Vector3 origin = math::Vector3(0, 0, 0);
