@@ -35,7 +35,12 @@ Ray CameraGetRay(vec3 lower_left_corner, vec3 horizontal, vec3 vertical, vec3 or
     return ray;
 }
 
-bool SphereHit(vec3 sphereOrigin, float radius, Ray ray)
+vec3 RayAt(Ray r, float t)
+{
+    return r.origin + r.direction * t;
+}
+
+float SphereHit(vec3 sphereOrigin, float radius, Ray ray)
 {
     vec3 oc = ray.origin - sphereOrigin;
 
@@ -45,14 +50,22 @@ bool SphereHit(vec3 sphereOrigin, float radius, Ray ray)
 
     float delta = b * b - 4.0 * a * c;
   
-    return delta > 0;
+    if (delta < 0) {
+        return -1.0;
+    } else {
+        return (-b - sqrt(delta) ) / (2.0*a);
+    }
 }
 
 
 vec3 RayColor(Ray ray)
 {
-    if(SphereHit(sphereOrigin,radius,ray))
-        return vec3(1,0,0);
+    float h = SphereHit(sphereOrigin,radius,ray);
+    if(h > 0.0)
+    {
+        vec3 N = normalize(RayAt(ray, h) - vec3(0,0,-1));
+        return 0.5*vec3(N.x+1, N.y+1, N.z+1);
+    }
     vec3 unit_direction=normalize(ray.direction);
     float t=unit_direction.y*0.5+0.5;
     return (1.0-t)*vec3(1.0)+t*vec3(0.5,0.7,1.0);
