@@ -18,60 +18,14 @@
 #include "maths_utils.h"
 #include "shader_utils.h"
 
+#include <Engine.hpp>
+
 const size_t WIDTH = 640;
 const size_t HEIGHT = 480;
 const char *WINDOW_NAME = "OpenGL Explorer";
 auto shader_utils = ShaderUtils::Program{};
 
 const bool loadShaderProgram(const bool erase_if_program_registered);
-
-static void KeyCallback(GLFWwindow *window, int key, int scancode, int action,
-                        int _mods) {
-  if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-    debug("reloading...");
-    loadShaderProgram(true);
-  }
-
-  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    glfwSetWindowShouldClose(window, GLFW_TRUE);
-}
-
-void FramebufferSizeCallback(GLFWwindow *window, int width, int height) {
-  glViewport(0, 0, width, height);
-}
-
-GLFWwindow *initializeWindow() {
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-  GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, WINDOW_NAME, NULL, NULL);
-  if (!window) {
-    error("window creation failed");
-    return NULL;
-  }
-
-  // Close the window as soon as the Escape key has been pressed
-  glfwSetKeyCallback(window, KeyCallback);
-  // Makes the window context current
-  glfwMakeContextCurrent(window);
-#ifdef _WIN64
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    error("could not start GLAD");
-    return NULL;
-  }
-#endif
-  // Enable the viewport
-  // cannot use gl function before initilize (defined region code)
-  int width, height;
-  glfwGetFramebufferSize(window, &width, &height);
-  glViewport(0, 0, width, height);
-
-  glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
-
-  return window;
-}
 
 inline auto readFile(const std::string_view path) -> const std::string {
   // Avoid dynamic allocation: read the 4096 first bytes
@@ -113,35 +67,9 @@ const bool loadShaderProgram(const bool erase_if_program_registered = true) {
   return true;
 }
 
-void ErrorCallback(int, const char *err_str) {
-  std::cout << "GLFW Error: " << err_str << std::endl;
-}
-
 int main(void) {
-  glfwSetErrorCallback(ErrorCallback);
-  // Initialize the lib
-  if (!glfwInit()) {
-    error("could not start GLFW3");
-    return -1;
-  }
-
-  math::Vector2 v2 = math::Vector2(1, 1);
-  math::Vector3 v3 = math::Vector3(1, 1, 1);
-  std::cout << v2.LengthSquared() << " " << v2.Length() << std::endl;
-  std::cout << v3.LengthSquared() << " " << v3.Length() << std::endl;
-
-  GLFWwindow *window = initializeWindow();
-  if (!window) {
-    glfwTerminate();
-    return -1;
-  }
-
-  // Note: Once you have a current OpenGL context, you can use OpenGL normally
-  // get version info
-  const GLubyte *renderer = glGetString(GL_RENDERER);
-  const GLubyte *version = glGetString(GL_VERSION);
-  info("Renderer: " << renderer);
-  info("OpenGL version supported: " << version);
+  Engine::Engine engine;
+  engine.Initialize();
 
   if (!loadShaderProgram(false)) {
     error("can't load the shaders to initiate the program");
@@ -209,7 +137,7 @@ int main(void) {
   math::Vector3 sphereOrigin = math::Vector3(0, 0, -1);
   float radius = 0.5f;
 
-  while (!glfwWindowShouldClose(window)) {
+  while (!engine.NeedsToCloseWindow()) {
     // Render
     glClearColor(1.0, 0.5, 0.5, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -245,7 +173,7 @@ int main(void) {
     // Poll for and process events
     glfwPollEvents();
     // Swap front and back buffers
-    glfwSwapBuffers(window);
+    glfwSwapBuffers(engine.GetWindow());
   }
 
   // ... here, the user closed the window
