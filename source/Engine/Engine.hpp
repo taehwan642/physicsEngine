@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #ifdef __APPLE__
 #define GL_SILENCE_DEPRECATION
@@ -14,9 +15,14 @@
 #include <GLFW/glfw3.h>
 #endif
 
+#include <Scene.hpp>
+
 namespace Engine {
 class Engine {
  private:
+  std::vector<std::shared_ptr<Scene>> scenes;
+  std::shared_ptr<Scene> currentScene;
+
   const size_t width = 640;
   const size_t height = 480;
   int framebufferWidth;
@@ -25,16 +31,22 @@ class Engine {
   GLFWwindow* window;
 
  public:
+  void AddScene(std::shared_ptr<Scene> scene);
+  void EnterScene(int sceneIndex);
   bool Initialize();
   void Update();
   void Render();
   void Exit();
 
   bool NeedsToCloseWindow();
+
   GLFWwindow* GetWindow();
+  size_t GetWidth();
+  size_t GetHeight();
 };
 }  // namespace Engine
 
-void InputCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void FramebufferSizeCallback(GLFWwindow *window, int width, int height);
-void ErrorCallback(int, const char *err_str);
+void InputCallback(GLFWwindow* window, int key, int scancode, int action,
+                   int mods);
+void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
+void ErrorCallback(int, const char* err_str);

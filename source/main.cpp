@@ -9,8 +9,12 @@
 #include <GLFW/glfw3.h>
 #endif
 
+#include <Engine.hpp>
+#include <Mesh.hpp>
+#include <Scene.hpp>
 #include <fstream>
 #include <iostream>
+#include <memory>
 
 #include "Vector2.hpp"
 #include "Vector3.hpp"
@@ -18,11 +22,6 @@
 #include "maths_utils.h"
 #include "shader_utils.h"
 
-#include <Engine.hpp>
-
-const size_t WIDTH = 640;
-const size_t HEIGHT = 480;
-const char *WINDOW_NAME = "OpenGL Explorer";
 auto shader_utils = ShaderUtils::Program{};
 
 const bool loadShaderProgram(const bool erase_if_program_registered);
@@ -68,61 +67,32 @@ const bool loadShaderProgram(const bool erase_if_program_registered = true) {
 }
 
 int main(void) {
-  Engine::Engine engine;
-  engine.Initialize();
+  std::unique_ptr<Engine::Engine> engine = std::make_unique<Engine::Engine>();
+  engine->Initialize();
+
+  std::shared_ptr<Engine::Scene> scene = std::make_shared<Engine::Scene>();
+  engine->AddScene(scene);
+
+  engine->EnterScene(0);
+
+  // load shader
+
+  // load model
+  std::unique_ptr<Engine::Mesh> mesh = std::make_unique<Engine::Mesh>();
+  mesh->Initialize("Test");
+
+  // attach model to object
 
   if (!loadShaderProgram(false)) {
     error("can't load the shaders to initiate the program");
-    glfwTerminate();
+    engine->Exit();
     return -1;
   }
   /* END OF SHADER PART */
 
   /* DRAW THE TRIANGLE */
-  const MathsUtils::vertex vertices[4] = {
-      {-1.0f, 1.0f, 0.0f},
-      {-1.0f, -1.0f, 0.0f},
-      {1.0f, -1.0f, 0.0f},
-      {1.0f, 1.0f, 0.0f}};
 
-  // Vertex Buffer Object = VBO
-  GLuint VBO = {};
-  glGenBuffers(1, &VBO);
-
-  // Something failed when generating buffers
-  if (glGetError() != GL_NO_ERROR) {
-    error("error when generating buffers");
-    glDeleteBuffers(1, &VBO);  // TODO: Needed?
-    glfwTerminate();
-    return -1;
-  }
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER,
-               MathsUtils::getNbElements(vertices) * sizeof(float), vertices,
-               GL_STATIC_DRAW | GL_MAP_READ_BIT);
-
-  // Vertex Arrays Object = VAO
-  GLuint VAO = {};
-  glGenVertexArrays(1, &VAO);
-  glBindVertexArray(VAO);
-
-  // Specify position attribute -> 0 as offset
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                        MathsUtils::VERTEX_ELEMENTS_NB * sizeof(float),
-                        (GLvoid *)0);
-  glEnableVertexAttribArray(0);
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  unsigned int indices[6] = {0, 1, 2, 0, 2, 3};
-
-  GLuint elementbuffer;
-  glGenBuffers(1, &elementbuffer);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
-  /* END OF DRAWING */
-
-  auto aspect_ratio = WIDTH / (float)HEIGHT;
+  auto aspect_ratio = engine->GetWidth() / (float)engine->GetHeight();
 
   float viewport_height = 2.0;
   // ratio = width / height
@@ -132,53 +102,59 @@ int main(void) {
   math::Vector3 origin = math::Vector3(0, 0, 0);
   math::Vector3 horizontal = math::Vector3(viewport_width, 0, 0);
   math::Vector3 vertical = math::Vector3(0.0f, viewport_height, 0.0);
-  math::Vector3 lower_left_corner = origin - horizontal / 2.0f - vertical / 2.0f - math::Vector3(0, 0, focal_length);
+  math::Vector3 lower_left_corner = origin - horizontal / 2.0f -
+                                    vertical / 2.0f -
+                                    math::Vector3(0, 0, focal_length);
 
   math::Vector3 sphereOrigin = math::Vector3(0, 0, -1);
   float radius = 0.5f;
 
-  while (!engine.NeedsToCloseWindow()) {
+  while (!engine->NeedsToCloseWindow()) {
+    engine->Update();
+    engine->Render();
+
     // Render
     glClearColor(1.0, 0.5, 0.5, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(shader_utils.getProgram().value());
-    
-    int uniformLowerLeftLocation = glGetUniformLocation(shader_utils.getProgram().value(), "lower_left_corner");
-    glUniform3f(uniformLowerLeftLocation, lower_left_corner.x_, lower_left_corner.y_, lower_left_corner.z_);
 
-    int uniformHorizonLocation = glGetUniformLocation(shader_utils.getProgram().value(), "horizontal");
-    glUniform3f(uniformHorizonLocation, horizontal.x_, horizontal.y_, horizontal.z_);
+    int uniformLowerLeftLocation = glGetUniformLocation(
+        shader_utils.getProgram().value(), "lower_left_corner");
+    glUniform3f(uniformLowerLeftLocation, lower_left_corner.x_,
+                lower_left_corner.y_, lower_left_corner.z_);
 
-    int uniformVerticalLocation = glGetUniformLocation(shader_utils.getProgram().value(), "vertical");
+    int uniformHorizonLocation =
+        glGetUniformLocation(shader_utils.getProgram().value(), "horizontal");
+    glUniform3f(uniformHorizonLocation, horizontal.x_, horizontal.y_,
+                horizontal.z_);
+
+    int uniformVerticalLocation =
+        glGetUniformLocation(shader_utils.getProgram().value(), "vertical");
     glUniform3f(uniformVerticalLocation, vertical.x_, vertical.y_, vertical.z_);
 
-    int uniformOriginLocation = glGetUniformLocation(shader_utils.getProgram().value(), "origin");
+    int uniformOriginLocation =
+        glGetUniformLocation(shader_utils.getProgram().value(), "origin");
     glUniform3f(uniformOriginLocation, origin.x_, origin.y_, origin.z_);
 
-    int uniformSphereLocation = glGetUniformLocation(shader_utils.getProgram().value(), "sphereOrigin");
-    glUniform3f(uniformSphereLocation, sphereOrigin.x_, sphereOrigin.y_, sphereOrigin.z_);
+    int uniformSphereLocation =
+        glGetUniformLocation(shader_utils.getProgram().value(), "sphereOrigin");
+    glUniform3f(uniformSphereLocation, sphereOrigin.x_, sphereOrigin.y_,
+                sphereOrigin.z_);
 
-    int uniformRadiusLocation = glGetUniformLocation(shader_utils.getProgram().value(), "radius");
+    int uniformRadiusLocation =
+        glGetUniformLocation(shader_utils.getProgram().value(), "radius");
     glUniform1f(uniformRadiusLocation, radius);
-
-    glBindVertexArray(VAO);
-    glDrawElements(
-    GL_TRIANGLES,      // mode
-    6,    // count
-    GL_UNSIGNED_INT,   // type
-    (void*)0           // element array buffer offset
-    );
+    mesh->Render();
     glUseProgram(0);
 
     // Poll for and process events
     glfwPollEvents();
     // Swap front and back buffers
-    glfwSwapBuffers(engine.GetWindow());
+    glfwSwapBuffers(engine->GetWindow());
   }
 
   // ... here, the user closed the window
-  glDeleteBuffers(1, &VBO);
-  glDeleteVertexArrays(1, &VAO);
-  glfwTerminate();
+  engine->Exit();
+  mesh->Exit();
   return 0;
 }

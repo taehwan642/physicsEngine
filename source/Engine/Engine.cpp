@@ -2,21 +2,31 @@
 
 #include <iostream>
 
-void InputCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
-{
+void InputCallback(GLFWwindow *window, int key, int scancode, int action,
+                   int mods) {
+  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
-void FramebufferSizeCallback(GLFWwindow *window, int width, int height)
-{
+void FramebufferSizeCallback(GLFWwindow *window, int width, int height) {
+  glViewport(0, 0, width, height);
 }
 
-void ErrorCallback(int error_code, const char *err_str)
-{
-    
+void ErrorCallback(int error_code, const char *err_str) {
+  std::cout << "GLFW Error: " << err_str << std::endl;
 }
 
-bool Engine::Engine::Initialize()
-{
+void Engine::Engine::AddScene(std::shared_ptr<Scene> scene) {
+  scenes.push_back(scene);
+}
+
+void Engine::Engine::EnterScene(int sceneIndex) {
+  if (currentScene != nullptr) currentScene->Exit();
+  currentScene = scenes[sceneIndex];
+  currentScene->Initialize();
+}
+
+bool Engine::Engine::Initialize() {
   glfwSetErrorCallback(ErrorCallback);
   // Initialize the lib
   if (!glfwInit()) {
@@ -32,7 +42,6 @@ bool Engine::Engine::Initialize()
   window = glfwCreateWindow(width, height, window_name.data(), NULL, NULL);
   if (window == nullptr) {
     std::cout << "window creation failed" << std::endl;
-    glfwTerminate();
     return false;
   }
 
@@ -43,7 +52,6 @@ bool Engine::Engine::Initialize()
 #ifdef _WIN64
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     std::cout << "could not load GLAD" << std::endl;
-    glfwTerminate();
     return false;
   }
 #endif
@@ -64,24 +72,21 @@ bool Engine::Engine::Initialize()
   return true;
 }
 
-void Engine::Engine::Update()
-{
+void Engine::Engine::Update() { currentScene->Update(); }
+
+void Engine::Engine::Render() { currentScene->Render(); }
+
+void Engine::Engine::Exit() {
+  currentScene->Exit();
+  glfwTerminate();
 }
 
-void Engine::Engine::Render()
-{
-}
-
-void Engine::Engine::Exit()
-{
-}
-
-bool Engine::Engine::NeedsToCloseWindow()
-{
+bool Engine::Engine::NeedsToCloseWindow() {
   return glfwWindowShouldClose(window);
 }
 
-GLFWwindow* Engine::Engine::GetWindow()
-{
-  return window;
-}
+GLFWwindow *Engine::Engine::GetWindow() { return window; }
+
+size_t Engine::Engine::GetWidth() { return width; }
+
+size_t Engine::Engine::GetHeight() { return height; }
