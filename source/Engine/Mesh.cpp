@@ -2,14 +2,14 @@
 
 #include <iostream>
 bool Engine::Mesh::Initialize(const std::string& fileName) {
-  vertices.push_back({math::Vector3(-.5f, -.5f, .5f)});
-  vertices.push_back({math::Vector3(-.5f, .5f, .5f)});
-  vertices.push_back({math::Vector3(.5f, .5f, .5f)});
-  vertices.push_back({math::Vector3(.5f, -.5f, .5f)});
-  vertices.push_back({math::Vector3(-.5f, -.5f, -.5f)});
-  vertices.push_back({math::Vector3(-.5f, .5f, -.5f)});
-  vertices.push_back({math::Vector3(.5f, .5f, -.5f)});
-  vertices.push_back({math::Vector3(.5f, -.5f, -.5f)});
+  vertices.push_back({math::Vector3(-1, -1, 1)});
+  vertices.push_back({math::Vector3(-1, 1, 1)});
+  vertices.push_back({math::Vector3(1, 1, 1)});
+  vertices.push_back({math::Vector3(1, -1, 1)});
+  vertices.push_back({math::Vector3(-1, -1, -1)});
+  vertices.push_back({math::Vector3(-1, 1, -1)});
+  vertices.push_back({math::Vector3(1, 1, -1)});
+  vertices.push_back({math::Vector3(1, -1, -1)});
 
   // Vertex Buffer Object = VBO
   glGenBuffers(1, &vertexBufferObject);

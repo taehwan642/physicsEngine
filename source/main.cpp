@@ -16,6 +16,7 @@
 #include <iostream>
 #include <memory>
 
+#include "Matrix4x4.hpp"
 #include "Vector2.hpp"
 #include "Vector3.hpp"
 #include "logs.h"
@@ -92,25 +93,28 @@ int main(void) {
 
   /* DRAW THE TRIANGLE */
 
-  auto aspect_ratio = engine->GetWidth() / (float)engine->GetHeight();
-
-  float viewport_height = 2.0;
-  // ratio = width / height
-  // width = ratio * height
-  float viewport_width = aspect_ratio * viewport_height;
-  float focal_length = 1.0;
-  math::Vector3 origin = math::Vector3(0, 0, 0);
-  math::Vector3 horizontal = math::Vector3(viewport_width, 0, 0);
-  math::Vector3 vertical = math::Vector3(0.0f, viewport_height, 0.0);
-  math::Vector3 lower_left_corner = origin - horizontal / 2.0f -
-                                    vertical / 2.0f -
-                                    math::Vector3(0, 0, focal_length);
-
-  math::Vector3 sphereOrigin = math::Vector3(0, 0, -1);
-  float radius = 0.5f;
-
   while (!engine->NeedsToCloseWindow()) {
+    static float yaw = 0.0f;
+    yaw += 0.1;
     engine->Update();
+    math::Matrix4x4 transform =
+        math::Matrix4x4::CreateScaleMatrix(math::Vector3(0.5, 0.5, 0.5));
+    transform = transform * math::Matrix4x4::CreateRotationYawMatrix(0);
+    transform = transform * math::Matrix4x4::CreateTranslationMatrix(
+                                math::Vector3(1, 0, 0));
+
+    std::cout << "transform row 0 : " << transform.element[0][0] << " "
+              << transform.element[0][1] << " " << transform.element[0][2]
+              << " " << transform.element[0][3] << std::endl;
+    std::cout << "transform row 1 : " << transform.element[1][0] << " "
+              << transform.element[1][1] << " " << transform.element[1][2]
+              << " " << transform.element[1][3] << std::endl;
+    std::cout << "transform row 2 : " << transform.element[2][0] << " "
+              << transform.element[2][1] << " " << transform.element[2][2]
+              << " " << transform.element[2][3] << std::endl;
+    std::cout << "transform row 3 : " << transform.element[3][0] << " "
+              << transform.element[3][1] << " " << transform.element[3][2]
+              << " " << transform.element[3][3] << std::endl;
     engine->Render();
 
     // Render
@@ -118,32 +122,10 @@ int main(void) {
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(shader_utils.getProgram().value());
 
-    int uniformLowerLeftLocation = glGetUniformLocation(
-        shader_utils.getProgram().value(), "lower_left_corner");
-    glUniform3f(uniformLowerLeftLocation, lower_left_corner.x_,
-                lower_left_corner.y_, lower_left_corner.z_);
+    unsigned int transformLoc =
+        glGetUniformLocation(shader_utils.getProgram().value(), "transform");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &transform.element[0][0]);
 
-    int uniformHorizonLocation =
-        glGetUniformLocation(shader_utils.getProgram().value(), "horizontal");
-    glUniform3f(uniformHorizonLocation, horizontal.x_, horizontal.y_,
-                horizontal.z_);
-
-    int uniformVerticalLocation =
-        glGetUniformLocation(shader_utils.getProgram().value(), "vertical");
-    glUniform3f(uniformVerticalLocation, vertical.x_, vertical.y_, vertical.z_);
-
-    int uniformOriginLocation =
-        glGetUniformLocation(shader_utils.getProgram().value(), "origin");
-    glUniform3f(uniformOriginLocation, origin.x_, origin.y_, origin.z_);
-
-    int uniformSphereLocation =
-        glGetUniformLocation(shader_utils.getProgram().value(), "sphereOrigin");
-    glUniform3f(uniformSphereLocation, sphereOrigin.x_, sphereOrigin.y_,
-                sphereOrigin.z_);
-
-    int uniformRadiusLocation =
-        glGetUniformLocation(shader_utils.getProgram().value(), "radius");
-    glUniform1f(uniformRadiusLocation, radius);
     mesh->Render();
     glUseProgram(0);
 
