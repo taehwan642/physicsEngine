@@ -70,7 +70,7 @@ const bool loadShaderProgram(const bool erase_if_program_registered = true) {
 int main(void) {
   std::unique_ptr<Engine::Engine> engine = std::make_unique<Engine::Engine>();
   engine->Initialize();
-
+  glEnable(GL_DEPTH_TEST);
   std::shared_ptr<Engine::Scene> scene = std::make_shared<Engine::Scene>();
   engine->AddScene(scene);
 
@@ -97,29 +97,16 @@ int main(void) {
     static float yaw = 0.0f;
     yaw += 0.1;
     engine->Update();
-    math::Matrix4x4 transform =
-        math::Matrix4x4::CreateScaleMatrix(math::Vector3(0.5, 0.5, 0.5));
-    transform = transform * math::Matrix4x4::CreateRotationYawMatrix(0);
+    math::Matrix4x4 transform = math::Matrix4x4::CreateIdentityMatrix();
     transform = transform * math::Matrix4x4::CreateTranslationMatrix(
-                                math::Vector3(1, 0, 0));
-
-    std::cout << "transform row 0 : " << transform.element[0][0] << " "
-              << transform.element[0][1] << " " << transform.element[0][2]
-              << " " << transform.element[0][3] << std::endl;
-    std::cout << "transform row 1 : " << transform.element[1][0] << " "
-              << transform.element[1][1] << " " << transform.element[1][2]
-              << " " << transform.element[1][3] << std::endl;
-    std::cout << "transform row 2 : " << transform.element[2][0] << " "
-              << transform.element[2][1] << " " << transform.element[2][2]
-              << " " << transform.element[2][3] << std::endl;
-    std::cout << "transform row 3 : " << transform.element[3][0] << " "
-              << transform.element[3][1] << " " << transform.element[3][2]
-              << " " << transform.element[3][3] << std::endl;
+                                math::Vector3(0, 0, std::cos(yaw)));
+    transform.ToString();
     engine->Render();
 
     // Render
     glClearColor(1.0, 0.5, 0.5, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT |
+            GL_DEPTH_BUFFER_BIT);  // also clear the depth buffer now!
     glUseProgram(shader_utils.getProgram().value());
 
     unsigned int transformLoc =

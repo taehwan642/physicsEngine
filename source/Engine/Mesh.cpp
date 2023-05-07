@@ -2,14 +2,14 @@
 
 #include <iostream>
 bool Engine::Mesh::Initialize(const std::string& fileName) {
-  vertices.push_back({math::Vector3(-1, -1, 1)});
-  vertices.push_back({math::Vector3(-1, 1, 1)});
-  vertices.push_back({math::Vector3(1, 1, 1)});
-  vertices.push_back({math::Vector3(1, -1, 1)});
-  vertices.push_back({math::Vector3(-1, -1, -1)});
-  vertices.push_back({math::Vector3(-1, 1, -1)});
-  vertices.push_back({math::Vector3(1, 1, -1)});
-  vertices.push_back({math::Vector3(1, -1, -1)});
+  vertices.push_back({math::Vector3(-.5f, -.5f, .5f)});
+  vertices.push_back({math::Vector3(-.5f, .5f, .5f)});
+  vertices.push_back({math::Vector3(.5f, .5f, .5f)});
+  vertices.push_back({math::Vector3(.5f, -.5f, .5f)});
+  vertices.push_back({math::Vector3(-.5f, -.5f, -.5f)});
+  vertices.push_back({math::Vector3(-.5f, .5f, -.5f)});
+  vertices.push_back({math::Vector3(.5f, .5f, -.5f)});
+  vertices.push_back({math::Vector3(.5f, -.5f, -.5f)});
 
   // Vertex Buffer Object = VBO
   glGenBuffers(1, &vertexBufferObject);
@@ -48,9 +48,10 @@ bool Engine::Mesh::Initialize(const std::string& fileName) {
   return true;
 }
 void Engine::Mesh::Render() {
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glBindVertexArray(vertexArraysObject);
   glDrawElements(GL_TRIANGLES,     // mode
-                 6,                // count
+                 12,               // count
                  GL_UNSIGNED_INT,  // type
                  (void*)0          // element array buffer offset
   );
