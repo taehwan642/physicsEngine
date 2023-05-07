@@ -48,10 +48,10 @@ bool Engine::Mesh::Initialize(const std::string& fileName) {
   return true;
 }
 void Engine::Mesh::Render() {
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glBindVertexArray(vertexArraysObject);
   glDrawElements(GL_TRIANGLES,     // mode
-                 12,               // count
+                 36,               // count
                  GL_UNSIGNED_INT,  // type
                  (void*)0          // element array buffer offset
   );

@@ -95,11 +95,20 @@ int main(void) {
 
   while (!engine->NeedsToCloseWindow()) {
     static float yaw = 0.0f;
-    yaw += 0.1;
+    yaw += 0.01f;
     engine->Update();
     math::Matrix4x4 transform = math::Matrix4x4::CreateIdentityMatrix();
+    transform = transform * math::Matrix4x4::CreateScaleMatrix(
+                                math::Vector3(0.1, 0.1, 0.1));
+
+    transform = transform * math::Matrix4x4::CreateRotationYawMatrix(yaw);
     transform = transform * math::Matrix4x4::CreateTranslationMatrix(
-                                math::Vector3(0, 0, std::cos(yaw)));
+                                math::Vector3(0, 0, -0.3f));
+    transform = transform * math::Matrix4x4::CreatePerspectiveMatrix(
+                                0.785398,
+                                engine->GetWidth() / (float)engine->GetHeight(),
+                                0.1f, 100.0f);
+
     transform.ToString();
     engine->Render();
 
@@ -111,7 +120,7 @@ int main(void) {
 
     unsigned int transformLoc =
         glGetUniformLocation(shader_utils.getProgram().value(), "transform");
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &transform.element[0][0]);
+    glUniformMatrix4fv(transformLoc, 1, GL_TRUE, &transform.element[0][0]);
 
     mesh->Render();
     glUseProgram(0);
