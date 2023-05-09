@@ -17,11 +17,14 @@
 
 #include <Scene.hpp>
 
+#include "UI.hpp"
+
 namespace Engine {
 class Engine {
  private:
   std::vector<std::shared_ptr<Scene>> scenes;
   std::shared_ptr<Scene> currentScene;
+  std::shared_ptr<UI> ui;
 
   const size_t width = 640;
   const size_t height = 480;

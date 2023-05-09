@@ -109,8 +109,7 @@ int main(void) {
                                 engine->GetWidth() / (float)engine->GetHeight(),
                                 0.1f, 100.0f);
 
-    transform.ToString();
-    engine->Render();
+    // transform.ToString();
 
     // Render
     glClearColor(1.0, 0.5, 0.5, 1.0);
@@ -120,7 +119,10 @@ int main(void) {
 
     unsigned int transformLoc =
         glGetUniformLocation(shader_utils.getProgram().value(), "transform");
+    // If transpose is GL_TRUE, each matrix is assumed to be supplied in row
+    // major order.
     glUniformMatrix4fv(transformLoc, 1, GL_TRUE, &transform.element[0][0]);
+    engine->Render();
 
     mesh->Render();
     glUseProgram(0);

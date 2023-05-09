@@ -69,14 +69,24 @@ bool Engine::Engine::Initialize() {
   std::cout << "Renderer: " << renderer << std::endl;
   std::cout << "OpenGL version supported: " << version << std::endl;
 
+  ui = std::make_shared<UI>();
+  if (ui->Initialize(this) == false) return false;
+
   return true;
 }
 
-void Engine::Engine::Update() { currentScene->Update(); }
+void Engine::Engine::Update() {
+  ui->Update();
+  currentScene->Update();
+}
 
-void Engine::Engine::Render() { currentScene->Render(); }
+void Engine::Engine::Render() {
+  ui->Render();
+  currentScene->Render();
+}
 
 void Engine::Engine::Exit() {
+  ui->Exit();
   currentScene->Exit();
   glfwTerminate();
 }

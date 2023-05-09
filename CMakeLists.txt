@@ -18,5 +18,5 @@ set(CMAKE_BUILD_TYPE Debug)
 find_package( OpenGL REQUIRED )
 
 add_subdirectory(math)
-add_subdirectory(glfw)
+add_subdirectory(dependency/glfw)
 add_subdirectory(source)
