@@ -2,5 +2,5 @@
 	path = math
 	url = https://github.com/taehwan642/math.git
 [submodule "glfw"]
-	path = glfw
+	path = dependency/glfw
 	url = https://github.com/glfw/glfw
