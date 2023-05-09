@@ -3,4 +3,4 @@
 	url = https://github.com/taehwan642/math.git
 [submodule "dependency/glfw"]
 	path = dependency/glfw
-	url = https://github.com/glfw/glfw
+	url = https://github.com/glfw/glfw.git
