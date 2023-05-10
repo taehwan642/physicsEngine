@@ -9,88 +9,24 @@
 #include <GLFW/glfw3.h>
 #endif
 
+#include <Engine.hpp>
+#include <Mesh.hpp>
+#include <Scene.hpp>
 #include <fstream>
 #include <iostream>
+#include <memory>
 
+#include "Matrix4x4.hpp"
 #include "Vector2.hpp"
 #include "Vector3.hpp"
 #include "logs.h"
 #include "maths_utils.h"
 #include "shader_utils.h"
 
-const size_t WIDTH = 640;
-const size_t HEIGHT = 480;
-const char *WINDOW_NAME = "OpenGL Explorer";
 auto shader_utils = ShaderUtils::Program{};
 
-/**
- * @brief Load the shaders, in order to display the result
- *
- * @param erase_if_program_registered Allow to erase the shader if it exists
- * @return true The shader has been successfully registered
- * @return false The shader has not been registered, due to an error
- */
 const bool loadShaderProgram(const bool erase_if_program_registered);
 
-/*
- * Callback to handle the "reload" event, once the user pressed the 'r' key.
- */
-static void KeyCallback(GLFWwindow *window, int key, int scancode, int action,
-                        int _mods) {
-  if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-    debug("reloading...");
-    loadShaderProgram(true);
-  }
-
-  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    glfwSetWindowShouldClose(window, GLFW_TRUE);
-}
-
-/*
- * Initializes the window and viewport via GLFW.
- * The viewport takes the all window.
- * If an error happens, the function returns `NULL` but **does not** free /
- * terminate the GLFW library. Then, do not forget to call `glfwTerminate` if
- * this function returns `NULL`.
- */
-GLFWwindow *initializeWindow() {
-  // Minimum target is OpenGL 4.1
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-  GLFWwindow *window = glfwCreateWindow(HEIGHT, WIDTH, WINDOW_NAME, NULL, NULL);
-  if (!window) {
-    error("window creation failed");
-    return NULL;
-  }
-
-  // Close the window as soon as the Escape key has been pressed
-  // Easy reload
-  glfwSetKeyCallback(window, KeyCallback);
-  // Makes the window context current
-  glfwMakeContextCurrent(window);
-#ifdef _WIN64
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    error("could not start GLAD");
-    return NULL;
-  }
-#endif
-  // Enable the viewport
-  // cannot use gl function before initilize (defined region code)
-  glViewport(0, 0, WIDTH, HEIGHT);
-
-  return window;
-}
-
-/**
- * @brief Returns the all file, as a string, which the file path has been passed
- * as parameter
- *
- * @param path The path of the file
- * @return The content of the file, as a string (read all file)
- */
 inline auto readFile(const std::string_view path) -> const std::string {
   // Avoid dynamic allocation: read the 4096 first bytes
   constexpr auto read_size = std::size_t(4096);
@@ -131,101 +67,74 @@ const bool loadShaderProgram(const bool erase_if_program_registered = true) {
   return true;
 }
 
-void ErrorCallback(int, const char *err_str) {
-  std::cout << "GLFW Error: " << err_str << std::endl;
-}
-
 int main(void) {
-  glfwSetErrorCallback(ErrorCallback);
-  // Initialize the lib
-  if (!glfwInit()) {
-    error("could not start GLFW3");
-    return -1;
-  }
+  std::unique_ptr<Engine::Engine> engine = std::make_unique<Engine::Engine>();
+  engine->Initialize();
+  glEnable(GL_DEPTH_TEST);
+  std::shared_ptr<Engine::Scene> scene = std::make_shared<Engine::Scene>();
+  engine->AddScene(scene);
 
-  math::Vector2 v2 = math::Vector2(1, 1);
-  math::Vector3 v3 = math::Vector3(1, 1, 1);
-  std::cout << v2.LengthSquared() << " " << v2.Length() << std::endl;
-  std::cout << v3.LengthSquared() << " " << v3.Length() << std::endl;
+  engine->EnterScene(0);
 
-  GLFWwindow *window = initializeWindow();
-  if (!window) {
-    glfwTerminate();
-    return -1;
-  }
+  // load shader
 
-  // Note: Once you have a current OpenGL context, you can use OpenGL normally
-  // get version info
-  const GLubyte *renderer = glGetString(GL_RENDERER);
-  const GLubyte *version = glGetString(GL_VERSION);
-  info("Renderer: " << renderer);
-  info("OpenGL version supported: " << version);
+  // load model
+  std::unique_ptr<Engine::Mesh> mesh = std::make_unique<Engine::Mesh>();
+  mesh->Initialize("Test");
+
+  // attach model to object
 
   if (!loadShaderProgram(false)) {
     error("can't load the shaders to initiate the program");
-    glfwTerminate();
+    engine->Exit();
     return -1;
   }
   /* END OF SHADER PART */
 
   /* DRAW THE TRIANGLE */
-  const MathsUtils::vertex vertices[3] = {
-      {0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f},
-      {0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f},
-      {-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f}};
 
-  // Vertex Buffer Object = VBO
-  GLuint VBO = {};
-  glGenBuffers(1, &VBO);
+  while (!engine->NeedsToCloseWindow()) {
+    static float yaw = 0.0f;
+    yaw += 0.01f;
+    engine->Update();
+    math::Matrix4x4 transform = math::Matrix4x4::CreateIdentityMatrix();
+    transform = transform * math::Matrix4x4::CreateScaleMatrix(
+                                math::Vector3(0.1, 0.1, 0.1));
 
-  // Something failed when generating buffers
-  if (glGetError() != GL_NO_ERROR) {
-    error("error when generating buffers");
-    glDeleteBuffers(1, &VBO);  // TODO: Needed?
-    glfwTerminate();
-    return -1;
-  }
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER,
-               MathsUtils::getNbElements(vertices) * sizeof(float), vertices,
-               GL_STATIC_DRAW | GL_MAP_READ_BIT);
+    transform = transform * math::Matrix4x4::CreateRotationYawMatrix(yaw);
+    transform = transform * math::Matrix4x4::CreateTranslationMatrix(
+                                math::Vector3(0, 0, -0.3f));
+    transform = transform * math::Matrix4x4::CreatePerspectiveMatrix(
+                                0.785398,
+                                engine->GetWidth() / (float)engine->GetHeight(),
+                                0.1f, 100.0f);
 
-  // Vertex Arrays Object = VAO
-  GLuint VAO = {};
-  glGenVertexArrays(1, &VAO);
-  glBindVertexArray(VAO);
+    // transform.ToString();
 
-  // Specify position attribute -> 0 as offset
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                        MathsUtils::VERTEX_ELEMENTS_NB * sizeof(float),
-                        (GLvoid *)0);
-  glEnableVertexAttribArray(0);
-
-  // Specify color attribute -> 3 as offset
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-                        MathsUtils::VERTEX_ELEMENTS_NB * sizeof(float),
-                        (GLvoid *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  /* END OF DRAWING */
-
-  while (!glfwWindowShouldClose(window)) {
     // Render
-    glClearColor(0.5, 0.5, 0.5, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(1.0, 0.5, 0.5, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT |
+            GL_DEPTH_BUFFER_BIT);  // also clear the depth buffer now!
     glUseProgram(shader_utils.getProgram().value());
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    unsigned int transformLoc =
+        glGetUniformLocation(shader_utils.getProgram().value(), "transform");
+    // If transpose is GL_TRUE, each matrix is assumed to be supplied in row
+    // major order.
+    glUniformMatrix4fv(transformLoc, 1, GL_TRUE, &transform.element[0][0]);
+    engine->Render();
+
+    mesh->Render();
+    glUseProgram(0);
+
     // Poll for and process events
     glfwPollEvents();
     // Swap front and back buffers
-    glfwSwapBuffers(window);
+    glfwSwapBuffers(engine->GetWindow());
   }
 
   // ... here, the user closed the window
-  glDeleteBuffers(1, &VBO);
-  glDeleteVertexArrays(1, &VAO);
-  glfwTerminate();
+  engine->Exit();
+  mesh->Exit();
   return 0;
 }
