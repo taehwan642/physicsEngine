@@ -26,10 +26,10 @@ class Engine {
   std::shared_ptr<Scene> currentScene;
   std::shared_ptr<UI> ui;
 
-  const size_t width = 640;
-  const size_t height = 480;
-  int framebufferWidth;
-  int framebufferHeight;
+  static const size_t width = 640;
+  static const size_t height = 480;
+  static int framebufferWidth;
+  static int framebufferHeight;
   std::string window_name = "physics Engine";
   GLFWwindow* window;
 
@@ -44,8 +44,12 @@ class Engine {
   bool NeedsToCloseWindow();
 
   GLFWwindow* GetWindow();
-  size_t GetWidth();
-  size_t GetHeight();
+  static size_t GetWidth();
+  static size_t GetHeight();
+  static int GetFrameBufferWidth();
+  static int GetFrameBufferHeight();
+  static void SetFrameBufferWidth(int newFrameBufferWidth);
+  static void SetFrameBufferHeight(int newFrameBufferHeight);
 };
 }  // namespace Engine
 

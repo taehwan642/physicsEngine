@@ -104,10 +104,13 @@ int main(void) {
     transform = transform * math::Matrix4x4::CreateRotationYawMatrix(yaw);
     transform = transform * math::Matrix4x4::CreateTranslationMatrix(
                                 math::Vector3(0, 0, -0.3f));
-    transform = transform * math::Matrix4x4::CreatePerspectiveMatrix(
-                                0.785398,
-                                engine->GetWidth() / (float)engine->GetHeight(),
-                                0.1f, 100.0f);
+    transform =
+        transform *
+        math::Matrix4x4::CreatePerspectiveMatrix(
+            0.785398,
+            Engine::Engine::GetFrameBufferWidth() /
+                static_cast<float>(Engine::Engine::GetFrameBufferHeight()),
+            0.1f, 100.0f);
 
     // transform.ToString();
 
@@ -122,9 +125,9 @@ int main(void) {
     // If transpose is GL_TRUE, each matrix is assumed to be supplied in row
     // major order.
     glUniformMatrix4fv(transformLoc, 1, GL_TRUE, &transform.element[0][0]);
+    mesh->Render();
     engine->Render();
 
-    mesh->Render();
     glUseProgram(0);
 
     // Poll for and process events

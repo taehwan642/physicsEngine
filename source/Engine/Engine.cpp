@@ -2,6 +2,10 @@
 
 #include <iostream>
 
+// non static variable needs to have a definition & initialize out of class
+int Engine::Engine::framebufferWidth = 0;
+int Engine::Engine::framebufferHeight = 0;
+
 void InputCallback(GLFWwindow *window, int key, int scancode, int action,
                    int mods) {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -10,6 +14,8 @@ void InputCallback(GLFWwindow *window, int key, int scancode, int action,
 
 void FramebufferSizeCallback(GLFWwindow *window, int width, int height) {
   glViewport(0, 0, width, height);
+  Engine::Engine::SetFrameBufferWidth(width);
+  Engine::Engine::SetFrameBufferHeight(height);
 }
 
 void ErrorCallback(int error_code, const char *err_str) {
@@ -76,13 +82,13 @@ bool Engine::Engine::Initialize() {
 }
 
 void Engine::Engine::Update() {
-  ui->Update();
   currentScene->Update();
+  ui->Update();
 }
 
 void Engine::Engine::Render() {
-  ui->Render();
   currentScene->Render();
+  ui->Render();
 }
 
 void Engine::Engine::Exit() {
@@ -100,3 +106,15 @@ GLFWwindow *Engine::Engine::GetWindow() { return window; }
 size_t Engine::Engine::GetWidth() { return width; }
 
 size_t Engine::Engine::GetHeight() { return height; }
+
+int Engine::Engine::GetFrameBufferWidth() { return framebufferWidth; }
+
+int Engine::Engine::GetFrameBufferHeight() { return framebufferHeight; }
+
+void Engine::Engine::SetFrameBufferWidth(int newFrameBufferWidth) {
+  framebufferWidth = newFrameBufferWidth;
+}
+
+void Engine::Engine::SetFrameBufferHeight(int newFrameBufferHeight) {
+  framebufferHeight = newFrameBufferHeight;
+}
