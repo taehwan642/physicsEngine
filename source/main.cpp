@@ -12,6 +12,7 @@
 #include <Engine.hpp>
 #include <Mesh.hpp>
 #include <Scene.hpp>
+#include <Time.hpp>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -92,8 +93,15 @@ int main(void) {
   /* END OF SHADER PART */
 
   /* DRAW THE TRIANGLE */
+  std::unique_ptr<Engine::Time> time = std::make_unique<Engine::Time>();
+
+  glfwSwapInterval(1);
 
   while (!engine->NeedsToCloseWindow()) {
+    time->Update();
+    std::string newTitle = "Physics Engine " + std::to_string(time->GetFPS());
+    glfwSetWindowTitle(engine->GetWindow(), newTitle.c_str());
+
     static float yaw = 0.0f;
     yaw += 0.01f;
     engine->Update();
