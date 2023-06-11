@@ -18,6 +18,7 @@
 #include <memory>
 
 #include "Matrix4x4.hpp"
+#include "Transform.hpp"  // remove after gameobject gets component array
 #include "Vector2.hpp"
 #include "Vector3.hpp"
 #include "logs.h"
@@ -97,6 +98,13 @@ int main(void) {
 
   glfwSwapInterval(1);
 
+  std::unique_ptr<Engine::Transform> transform =
+      std::make_unique<Engine::Transform>();
+  transform->Initialize();
+
+  transform->SetPosition(math::Vector3(0, 0, -0.3f));
+  transform->SetScale(math::Vector3(0.1f, 0.1f, 0.1f));
+
   while (!engine->NeedsToCloseWindow()) {
     time->Update();
     std::string newTitle = "Physics Engine " + std::to_string(time->GetFPS());
@@ -104,23 +112,19 @@ int main(void) {
 
     static float yaw = 0.0f;
     yaw += 0.01f;
-    engine->Update();
-    math::Matrix4x4 transform = math::Matrix4x4::CreateIdentityMatrix();
-    transform = transform * math::Matrix4x4::CreateScaleMatrix(
-                                math::Vector3(0.1, 0.1, 0.1));
+    transform->SetRotation(math::Vector3(yaw, 0, 0));
 
-    transform = transform * math::Matrix4x4::CreateRotationYawMatrix(yaw);
-    transform = transform * math::Matrix4x4::CreateTranslationMatrix(
-                                math::Vector3(0, 0, -0.3f));
-    transform =
-        transform *
+    engine->Update();
+    transform->Update();
+
+    math::Matrix4x4 transformMatrix = transform->GetTransformMatrix();
+    transformMatrix =
+        transformMatrix *
         math::Matrix4x4::CreatePerspectiveMatrix(
             0.785398,
             Engine::Engine::GetFrameBufferWidth() /
                 static_cast<float>(Engine::Engine::GetFrameBufferHeight()),
             0.1f, 100.0f);
-
-    // transform.ToString();
 
     // Render
     glClearColor(1.0, 0.5, 0.5, 1.0);
@@ -132,7 +136,8 @@ int main(void) {
         glGetUniformLocation(shader_utils.getProgram().value(), "transform");
     // If transpose is GL_TRUE, each matrix is assumed to be supplied in row
     // major order.
-    glUniformMatrix4fv(transformLoc, 1, GL_TRUE, &transform.element[0][0]);
+    glUniformMatrix4fv(transformLoc, 1, GL_TRUE,
+                       &transformMatrix.element[0][0]);
     mesh->Render();
     engine->Render();
 
