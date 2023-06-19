@@ -25,8 +25,8 @@ void Engine::Transform::Update() {
   transformMatrix = math::Matrix4x4::CreateIdentityMatrix();
   transformMatrix = transformMatrix * math::Matrix4x4::CreateScaleMatrix(scale);
 
-  transformMatrix =
-      transformMatrix * math::Matrix4x4::CreateRotationYawMatrix(rotation.x_);
+  transformMatrix = transformMatrix *
+                    math::Matrix4x4::CreateRotationYawPitchRollMatrix(rotation);
   transformMatrix =
       transformMatrix * math::Matrix4x4::CreateTranslationMatrix(position);
 }
